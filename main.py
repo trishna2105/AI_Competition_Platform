@@ -49,7 +49,7 @@ def get_score_from_ai(prompt, image_url):
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
-                "Authorization": "Bearer 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",
+                "Authorization": "Bearer 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",
                 "Content-Type": "application/json"
             },
             json={
@@ -60,7 +60,7 @@ def get_score_from_ai(prompt, image_url):
                         "content": [
                             {
                                 "type": "text",
-                                "text": f"Rate this image from 1 to 10 and give a short reason in 1 line.\nReturn format: score: <number>, reason: <text>\nPrompt: {prompt}"
+                                "text": f"Rate this image from 1 to 10 and give a detailed reason.\nReturn format: score: <number>, reason: <text>\nPrompt: {prompt}"
                             },
                             {
                                 "type": "image_url",
@@ -97,27 +97,30 @@ supabase = create_client(url, key)
 #mock_agent execution
 def run_mock_agents(competition_id):
     db = SessionLocal()
+    try:
 
-    comp = db.query(Competition).filter(Competition.id == competition_id).first()
-    participants = db.query(CompetitionParticipant).filter(
-        CompetitionParticipant.competition_id == competition_id
-    ).all()
+        comp = db.query(Competition).filter(Competition.id == competition_id).first()
+        participants = db.query(CompetitionParticipant).filter(
+            CompetitionParticipant.competition_id == competition_id
+        ).all()
 
-    for p in participants:
-        agent_id = p.agent_id
+        for p in participants:
+            agent_id = p.agent_id
 
-        for i in range(comp.max_iterations):   # multi-iteration added
-            image_url = generate_image_from_vertex(comp.prompt)
+            for i in range(comp.max_iterations):   # multi-iteration added
+                image_url = generate_image_from_vertex(comp.prompt)
 
-            sub = Submission(
-                competition_id=competition_id,
-                agent_id=agent_id,
-                image_url=image_url,
-                iteration_number=i+1
-            )
-            db.add(sub)
+                sub = Submission(
+                    competition_id=competition_id,
+                    agent_id=agent_id,
+                    image_url=image_url,
+                    iteration_number=i+1
+                )
+                db.add(sub)
 
-    db.commit()
+        db.commit()
+    finally:
+        db.close()
 
 #Add image generation
 
@@ -144,171 +147,217 @@ def generate_image_from_vertex(prompt):
 @app.post("/agent/register")
 def register_agent(name: str):
     db = SessionLocal()
-    agent = Agent(name=name)
-    db.add(agent)
-    db.commit()
-    return {"msg": "agent created"}
+    try:
+        agent = Agent(name=name)
+        db.add(agent)
+        db.commit()
+        return {"msg": "agent created"}
+    finally:
+        db.close()
 
 @app.post("/agent/login")
 def login_agent(id: int):
     db = SessionLocal()
-    agent = db.query(Agent).filter(Agent.id == id).first()
-    return {"msg": "login success" if agent else "not found"}
+    try:
+        agent = db.query(Agent).filter(Agent.id == id).first()
+        return {"msg": "login success" if agent else "not found"}
+    finally:
+        db.close()
 
 #Competition apis
 
 @app.post("/competition/create")
 def create_competition(payload: CreateCompetitionRequest):
     db=SessionLocal()
-    new_comp = Competition(
-        title=payload.title,
-        prompt=payload.prompt,
-        max_iterations=payload.max_iterations,
-        min_agents=payload.min_agents,
-        duration=payload.duration
-        
-    )
-    db.add(new_comp)
-    db.commit()
-    db.refresh(new_comp)
-    return {
-        "msg": "Competition created",
-        "id": new_comp.id,
-        "title": new_comp.title,
-        "prompt": new_comp.prompt,
-        "max_iterations": new_comp.max_iterations,
-        "min_agents": new_comp.min_agents,
-        "status": new_comp.status,
-        "created_at": new_comp.created_at,
-    }
+    try:
+        new_comp = Competition(
+            title=payload.title,
+            prompt=payload.prompt,
+            max_iterations=payload.max_iterations,
+            min_agents=payload.min_agents,
+            duration=payload.duration
+            
+        )
+        db.add(new_comp)
+        db.commit()
+        db.refresh(new_comp)
+        return {
+            "msg": "Competition created",
+            "id": new_comp.id,
+            "title": new_comp.title,
+            "prompt": new_comp.prompt,
+            "max_iterations": new_comp.max_iterations,
+            "min_agents": new_comp.min_agents,
+            "participant_count": 0,
+            "status": new_comp.status,
+            "created_at": new_comp.created_at,
+        }
+    finally:
+        db.close()
 
 @app.get("/competitions")
 def get_competitions():
     db=SessionLocal()
-    data=db.query(Competition).all()
-    return [
-        {
-            "id": c.id,
-            "title": c.title,
-            "prompt": c.prompt,
-            "max_iterations": c.max_iterations,
-            "min_agents": c.min_agents,
-            "status": c.status,
-            "created_at": c.created_at
-        }
-        for c in data
-    ]
+    try:
+        data=db.query(Competition).all()
+        return [
+            {
+                "id": c.id,
+                "title": c.title,
+                "prompt": c.prompt,
+                "max_iterations": c.max_iterations,
+                "min_agents": c.min_agents,
+                "participant_count": db.query(CompetitionParticipant).filter(CompetitionParticipant.competition_id == c.id).count(),
+                "status": c.status,
+                "created_at": c.created_at
+            }
+            for c in data
+        ]
+    finally:
+        db.close()
 @app.get("/competition/{id}")
 def get_competition_by_id(id: int):
     db=SessionLocal()
-    data=db.query(Competition).filter(Competition.id==id).first()
-    if not data:
-        raise HTTPException(status_code=404, detail="Competition not found")
+    try:
+        data=db.query(Competition).filter(Competition.id==id).first()
+        if not data:
+            raise HTTPException(status_code=404, detail="Competition not found")
 
-    return {
-        "id": data.id,
-        "title": data.title,
-        "prompt": data.prompt,
-        "max_iterations": data.max_iterations,
-        "min_agents": data.min_agents,
-        "status": data.status,
-        "created_at": data.created_at
-    }
+        return {
+            "id": data.id,
+            "title": data.title,
+            "prompt": data.prompt,
+            "max_iterations": data.max_iterations,
+            "min_agents": data.min_agents,
+            "participant_count": db.query(CompetitionParticipant).filter(CompetitionParticipant.competition_id == data.id).count(),
+            "status": data.status,
+            "created_at": data.created_at
+        }
+    finally:
+        db.close()
 @app.post("/competition/{id}/join")
 def join_competition(id: int, payload: JoinCompetitionRequest):
     db = SessionLocal()
-    competition = db.query(Competition).filter(Competition.id == id).first()
-    if not competition:
-        raise HTTPException(status_code=404, detail="Competition not found")
+    try:
+        competition = db.query(Competition).filter(Competition.id == id).first()
+        if not competition:
+            raise HTTPException(status_code=404, detail="Competition not found")
 
-    agent = db.query(Agent).filter(Agent.id == payload.agent_id).first()
-    if not agent:
-        agent = Agent(id=payload.agent_id, name=f"Agent {payload.agent_id}")
-        db.add(agent)
+        existing_participant = db.query(CompetitionParticipant).filter(
+            CompetitionParticipant.competition_id == id,
+            CompetitionParticipant.agent_id == payload.agent_id
+        ).first()
+        if existing_participant:
+            return {"msg": "already joined"}
+
+        joined_count = db.query(CompetitionParticipant).filter(
+            CompetitionParticipant.competition_id == id
+        ).count()
+        if joined_count >= competition.min_agents:
+            raise HTTPException(status_code=400, detail="competition full")
+
+        agent = db.query(Agent).filter(Agent.id == payload.agent_id).first()
+        if not agent:
+            agent = Agent(id=payload.agent_id, name=f"Agent {payload.agent_id}")
+            db.add(agent)
+            db.commit()
+
+        cp = CompetitionParticipant(competition_id=id, agent_id=payload.agent_id)
+        db.add(cp)
         db.commit()
-
-    cp = CompetitionParticipant(competition_id=id, agent_id=payload.agent_id)
-    db.add(cp)
-    db.commit()
-    return {"msg": "joined"}
+        return {"msg": "joined"}
+    finally:
+        db.close()
 
 #Submission apis
 
 @app.post("/submit-output")
 def submit_output(payload: SubmitOutputRequest):
     db = SessionLocal()
-    sub = Submission(
-        competition_id=payload.competition_id,
-        agent_id=payload.agent_id,
-        image_url=payload.image_url
-    )
-    db.add(sub)
-    db.commit()
-    return {"msg": "submitted"}
+    try:
+        sub = Submission(
+            competition_id=payload.competition_id,
+            agent_id=payload.agent_id,
+            image_url=payload.image_url
+        )
+        db.add(sub)
+        db.commit()
+        return {"msg": "submitted"}
+    finally:
+        db.close()
 
 @app.get("/competition/{id}/submissions")
 def get_submissions(id: int):
     db = SessionLocal()
-    data = db.query(Submission).filter(Submission.competition_id == id).all()
-    return [
-        {
-            "agent_id": s.agent_id,
-            "submission_id": s.id,
-            "image_url": s.image_url,
-            "score": s.score,
-            "reason": s.reason,
-        }
-        for s in data
-    ]
+    try:
+        data = db.query(Submission).filter(Submission.competition_id == id).all()
+        return [
+            {
+                "agent_id": s.agent_id,
+                "submission_id": s.id,
+                "image_url": s.image_url,
+                "score": s.score,
+                "reason": s.reason,
+            }
+            for s in data
+        ]
+    finally:
+        db.close()
 
 #leaderboard apis
 @app.get("/leaderboard/{competition_id}")
 def leaderboard(competition_id: int):
     db = SessionLocal()
-    data = db.query(Submission).filter(Submission.competition_id == competition_id).all()
+    try:
+        data = db.query(Submission).filter(Submission.competition_id == competition_id).all()
 
-    best_scores = {}
+        best_scores = {}
 
-    for s in data:
-        current_score = s.score if s.score is not None else 0
-        best_score = (
-            best_scores[s.agent_id]["score"]
-            if s.agent_id in best_scores and best_scores[s.agent_id]["score"] is not None
-            else 0
-        )
+        for s in data:
+            current_score = s.score if s.score is not None else 0
+            best_score = (
+                best_scores[s.agent_id]["score"]
+                if s.agent_id in best_scores and best_scores[s.agent_id]["score"] is not None
+                else 0
+            )
 
-        if s.agent_id not in best_scores or current_score > best_score:
-            best_scores[s.agent_id] = {
-                "agent_id": s.agent_id,
-                "score": s.score,
-                "reason": s.reason
-            }
+            if s.agent_id not in best_scores or current_score > best_score:
+                best_scores[s.agent_id] = {
+                    "agent_id": s.agent_id,
+                    "score": s.score,
+                    "reason": s.reason
+                }
 
-    result = list(best_scores.values())
+        result = list(best_scores.values())
 
-    return sorted(result, key=lambda x: x["score"] if x["score"] else 0, reverse=True)
+        return sorted(result, key=lambda x: x["score"] if x["score"] else 0, reverse=True)
+    finally:
+        db.close()
 
 #Internal Apis(mock for now)
 @app.post("/internal/start-competition/{id}")
 def start_comp(id: int):
     db = SessionLocal()
-    comp = db.query(Competition).filter(Competition.id == id).first()
+    try:
+        comp = db.query(Competition).filter(Competition.id == id).first()
 
-    if not comp:
-        return {"msg": "not found"}
+        if not comp:
+            return {"msg": "not found"}
 
-    comp.status = "ongoing"
-    db.commit()
+        comp.status = "ongoing"
+        db.commit()
 
-    run_mock_agents(id)
+        run_mock_agents(id)
 
-    def run_later(comp_id, duration):
-        time.sleep(duration)
-        evaluate(comp_id)
+        def run_later(comp_id, duration):
+            time.sleep(duration)
+            evaluate(comp_id)
 
-    threading.Thread(target=run_later, args=(id, comp.duration)).start()
+        threading.Thread(target=run_later, args=(id, comp.duration)).start()
 
-    return {"msg": "competition started"}
+        return {"msg": "competition started"}
+    finally:
+        db.close()
 
 
 
@@ -322,22 +371,25 @@ def run_iter():
 @app.post("/internal/evaluate/{competition_id}")
 def evaluate(competition_id: int):
     db = SessionLocal()
+    try:
 
-    comp = db.query(Competition).filter(Competition.id == competition_id).first()
-    subs = db.query(Submission).filter(Submission.competition_id == competition_id).all()
+        comp = db.query(Competition).filter(Competition.id == competition_id).first()
+        subs = db.query(Submission).filter(Submission.competition_id == competition_id).all()
 
-    agent_best = {}
+        agent_best = {}
 
-    for s in subs:
-        result = get_score_from_ai(comp.prompt, s.image_url)
-        s.score = result["score"]
-        s.reason = result["reason"]
+        for s in subs:
+            result = get_score_from_ai(comp.prompt, s.image_url)
+            s.score = result["score"]
+            s.reason = result["reason"]
 
-        if s.agent_id not in agent_best or s.score > agent_best[s.agent_id]:
-            agent_best[s.agent_id] = s.score
+            if s.agent_id not in agent_best or s.score > agent_best[s.agent_id]:
+                agent_best[s.agent_id] = s.score
 
-    db.commit()
-    return {"msg": "AI scoring done"}
+        db.commit()
+        return {"msg": "AI scoring done"}
+    finally:
+        db.close()
 
 @app.post("/internal/distribute-rewards")
 def rewards():
@@ -348,30 +400,33 @@ def rewards():
 @app.post("/internal/update-leaderboard/{competition_id}")
 def update_leaderboard(competition_id: int):
     db = SessionLocal()
+    try:
 
-    subs = db.query(Submission).filter(Submission.competition_id == competition_id).all()
+        subs = db.query(Submission).filter(Submission.competition_id == competition_id).all()
 
-    best_scores = {}
+        best_scores = {}
 
-    for s in subs:
-        if s.agent_id not in best_scores or (s.score and s.score > best_scores[s.agent_id]):
-            best_scores[s.agent_id] = s.score
+        for s in subs:
+            if s.agent_id not in best_scores or (s.score and s.score > best_scores[s.agent_id]):
+                best_scores[s.agent_id] = s.score
 
-    sorted_agents = sorted(best_scores.items(), key=lambda x: x[1] if x[1] else 0, reverse=True)
+        sorted_agents = sorted(best_scores.items(), key=lambda x: x[1] if x[1] else 0, reverse=True)
 
-    rank = 1
-    for agent_id, score in sorted_agents:
-        entry = Leaderboard(
-            competition_id=competition_id,
-            agent_id=agent_id,
-            final_score=score,
-            rank=rank
-        )
-        db.add(entry)
-        rank += 1
+        rank = 1
+        for agent_id, score in sorted_agents:
+            entry = Leaderboard(
+                competition_id=competition_id,
+                agent_id=agent_id,
+                final_score=score,
+                rank=rank
+            )
+            db.add(entry)
+            rank += 1
 
-    db.commit()
-    return {"msg": "leaderboard updated"}
+        db.commit()
+        return {"msg": "leaderboard updated"}
+    finally:
+        db.close()
 
 
 
