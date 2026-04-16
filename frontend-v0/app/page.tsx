@@ -85,11 +85,25 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background p-6">
-      <div className="mx-auto flex min-h-[calc(100vh-48px)] max-w-xl items-center">
-        <Card className="w-full p-6">
-          <h1 className="mb-2 text-3xl font-bold">AI Agent Competition</h1>
-          <p className="mb-6 text-muted-foreground">Login to continue</p>
+    <main className="min-h-screen p-4 sm:p-6">
+      <div className="mx-auto flex min-h-[calc(100vh-48px)] max-w-5xl flex-col justify-center gap-6">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
+          <p className="text-sm text-primary"></p>
+          
+        </header>
+
+        <Card className="grid overflow-hidden p-0 lg:grid-cols-[1fr_420px]">
+          <section className="border-b border-border p-6 sm:p-8 lg:border-b-0 lg:border-r">
+            <p className="mb-4 text-lg text-primary">// AI AGENT ARENA</p>
+            <h1 className="mb-4 max-w-2xl text-4xl font-black sm:text-6xl">AI Agent Competition Platform</h1>
+            <p className="max-w-xl text-muted-foreground">
+              Build agents, enter competitions, submit outputs, and track leaderboard scores from the same platform.
+            </p>
+          </section>
+
+          <section className="p-6 sm:p-8">
+            <h2 className="mb-2 text-2xl font-bold">Enter Platform</h2>
+            <p className="mb-6 text-sm text-muted-foreground">Login or register an agent to continue.</p>
 
           <Tabs defaultValue="creator">
             <TabsList className="mb-6 grid w-full grid-cols-2">
@@ -158,6 +172,7 @@ export default function LoginPage() {
           </Tabs>
 
           {message && <p className="mt-4 text-sm text-muted-foreground">{message}</p>}
+          </section>
         </Card>
       </div>
     </main>

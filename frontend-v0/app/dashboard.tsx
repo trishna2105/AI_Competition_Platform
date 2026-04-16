@@ -54,9 +54,10 @@ function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background lg:grid lg:grid-cols-[240px_1fr]">
-      <aside className="border-b p-4 lg:min-h-screen lg:border-b-0 lg:border-r">
-        <h1 className="text-xl font-bold">AI Competition Platform</h1>
+    <div className="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
+      <aside className="border-b border-border bg-card/90 p-4 lg:min-h-screen lg:border-b-0 lg:border-r">
+        <p className="text-sm text-primary"></p>
+        <h1 className="text-2xl font-black">AI Competition Platform</h1>
         <p className="mb-6 text-sm text-muted-foreground">{subtitle}</p>
         <nav className="grid gap-2">
           {items.map((item) => (
@@ -73,11 +74,11 @@ function DashboardLayout({
         </nav>
       </aside>
 
-      <main className="p-6">
+      <main className="p-4 sm:p-6">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-bold">{title}</h2>
-            <p className="text-muted-foreground">{activeItem}</p>
+            <p className="text-sm text-primary">// {activeItem}</p>
+            <h2 className="text-3xl font-black sm:text-4xl">{title}</h2>
           </div>
           <Button type="button" variant="outline" onClick={onLogout}>
             Logout
@@ -102,13 +103,14 @@ function CompetitionCard({
     <Card className="p-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h3 className="text-lg font-bold">{competition.title}</h3>
+          <p className="mb-1 text-xs text-primary">COMPETITION #{competition.id}</p>
+          <h3 className="text-xl font-bold">{competition.title}</h3>
           <p className="mb-3 text-sm text-muted-foreground">{competition.prompt}</p>
           <div className="flex flex-wrap gap-4 text-sm">
-            <span>Max Iterations: {competition.max_iterations}</span>
-            <span>Min Agents: {competition.min_agents}</span>
-            <span>Participants: {competition.participant_count || 0}/{competition.min_agents}</span>
-            {competition.status && <span>Status: {competition.status}</span>}
+            <span className="border border-border bg-muted px-2 py-1">Max Iterations: {competition.max_iterations}</span>
+            <span className="border border-border bg-muted px-2 py-1">Min Agents: {competition.min_agents}</span>
+            <span className="border border-border bg-muted px-2 py-1">Players: {competition.participant_count || 0}/{competition.min_agents}</span>
+            {competition.status && <span className="border border-primary bg-primary px-2 py-1 text-primary-foreground">Status: {competition.status}</span>}
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -124,11 +126,12 @@ function CompetitionCard({
 
 function CompetitionDetails({ competition }: { competition: Competition | null }) {
   if (!competition) {
-    return <p className="text-muted-foreground">Select a competition to view details.</p>;
+    return <p className="border border-dashed border-border p-4 text-sm text-muted-foreground">Select a competition to view details.</p>;
   }
 
   return (
     <Card className="p-4">
+      <p className="mb-1 text-xs text-primary">// DETAILS</p>
       <h3 className="mb-2 text-xl font-bold">{competition.title}</h3>
       <p className="mb-4 text-muted-foreground">{competition.prompt}</p>
       <div className="grid gap-2 text-sm sm:grid-cols-2">
@@ -144,7 +147,7 @@ function CompetitionDetails({ competition }: { competition: Competition | null }
 
 function SubmissionsList({ submissions }: { submissions: Submission[] }) {
   if (submissions.length === 0) {
-    return <p className="text-muted-foreground">No submissions yet</p>;
+    return <p className="border border-dashed border-border p-4 text-sm text-muted-foreground">No submissions yet</p>;
   }
 
   return (
@@ -153,7 +156,7 @@ function SubmissionsList({ submissions }: { submissions: Submission[] }) {
         <Card key={`${sub.submission_id || idx}`} className="p-4">
           <p className="mb-2 font-medium">Agent: {sub.agent_id}</p>
           {sub.image_url && (
-            <img src={sub.image_url} alt="Submission" className="mb-3 max-h-80 w-full rounded object-contain" />
+            <img src={sub.image_url} alt="Submission" className="mb-3 max-h-80 w-full rounded border border-border object-contain" />
           )}
           <p className="text-sm text-muted-foreground">Score: {sub.score ?? 'Not scored'}</p>
           {sub.reason && <p className="text-sm text-muted-foreground">Reason: {sub.reason}</p>}
@@ -165,13 +168,13 @@ function SubmissionsList({ submissions }: { submissions: Submission[] }) {
 
 function LeaderboardList({ leaderboard }: { leaderboard: LeaderboardEntry[] }) {
   if (leaderboard.length === 0) {
-    return <p className="text-muted-foreground">No entries yet</p>;
+    return <p className="border border-dashed border-border p-4 text-sm text-muted-foreground">No entries yet</p>;
   }
 
   return (
     <div className="space-y-2">
       {leaderboard.map((entry, idx) => (
-        <div key={`${entry.agent_id}-${idx}`} className="flex justify-between rounded border p-3">
+        <div key={`${entry.agent_id}-${idx}`} className="flex justify-between border bg-muted p-3">
           <span className="font-medium">Agent {entry.agent_id}</span>
           <span className="text-muted-foreground">Score: {entry.score ?? 'Not scored'}</span>
         </div>
