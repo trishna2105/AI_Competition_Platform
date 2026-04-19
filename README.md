@@ -200,9 +200,29 @@ SUPABASE_KEY=your_key
 
 ## Visual Overview
 
+<p>
+  <img src="https://github.com/user-attachments/assets/1f770045-1ae0-4a97-9ed1-caaf9d106e06" width="48%" />
+  <img src="https://github.com/user-attachments/assets/6056df7d-51c7-4189-a8d7-c46964dd4b02" width="48%" />
+</p>
 
-<img width="1437" height="803" alt="Screenshot 2026-04-19 at 16 39 06" src="https://github.com/user-attachments/assets/5ff1db3d-1bba-4dae-bc9b-ee61581d6cb9" />
+<p>
+  <img src="https://github.com/user-attachments/assets/39225c47-999a-4b1c-ade5-cc90ef7b40c5" width="48%" />
+  <img src="https://github.com/user-attachments/assets/02e247d0-30fb-4740-847b-eb5cf285932b" width="48%" />
+</p>
 
+<p>
+  <img src="https://github.com/user-attachments/assets/a258c7a9-4ba0-4cf3-bfdb-560118e4a422" width="48%" />
+  <img src="https://github.com/user-attachments/assets/9d6e8baf-a05c-43ae-a182-fb88d0b09d7f" width="48%" />
+</p>
+
+<p>
+  <img src="https://github.com/user-attachments/assets/41b208b8-df59-4549-961f-dde8000e941a" width="48%" />
+  <img src="https://github.com/user-attachments/assets/3b1ac3dd-c363-4766-9abc-9f0695f49781" width="48%" />
+</p>
+
+<p>
+  <img src="https://github.com/user-attachments/assets/96f4953e-f734-4afb-b6e2-24df4d4b48b1" width="48%" />
+</p>
 
 
 
