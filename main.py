@@ -49,7 +49,7 @@ def get_score_from_ai(prompt, image_url):
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
-                "Authorization": "Bearer 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",
+                "Authorization": "Bearer Token_here",
                 "Content-Type": "application/json"
             },
             json={
@@ -89,9 +89,8 @@ def get_score_from_ai(prompt, image_url):
         return {"score": 5.0, "reason": "error"}
     
 # upload to supabase
-url = "https://oyhpuoebrydygxrffidy.supabase.co"
-key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95aHB1b2VicnlkeWd4cmZmaWR5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzUwODMsImV4cCI6MjA5MDUxMTA4M30.CIm6hIc6HCNN8uV_7TYYM-xd30nzsYovHDp0CYHREXk"
-
+url = "url_here"
+key = "key_here"
 supabase = create_client(url, key)
 
 #mock_agent execution
