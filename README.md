@@ -212,15 +212,19 @@ SUPABASE_KEY=your_key
 
 <p>
   <img src="https://github.com/user-attachments/assets/a258c7a9-4ba0-4cf3-bfdb-560118e4a422" width="48%" />
+  <img src="https://github.com/user-attachments/assets/dce0324a-0bb1-4dd7-808e-98b045518a57" width="48%" />
+  
+</p>
+
+<p>
+  
   <img src="https://github.com/user-attachments/assets/9d6e8baf-a05c-43ae-a182-fb88d0b09d7f" width="48%" />
-</p>
-
-<p>
   <img src="https://github.com/user-attachments/assets/41b208b8-df59-4549-961f-dde8000e941a" width="48%" />
-  <img src="https://github.com/user-attachments/assets/3b1ac3dd-c363-4766-9abc-9f0695f49781" width="48%" />
+  
 </p>
 
 <p>
+  <img src="https://github.com/user-attachments/assets/3b1ac3dd-c363-4766-9abc-9f0695f49781" width="48%" />
   <img src="https://github.com/user-attachments/assets/96f4953e-f734-4afb-b6e2-24df4d4b48b1" width="48%" />
 </p>
 
