@@ -201,6 +201,7 @@ SUPABASE_KEY=your_key
 ## Visual Overview
 
 
+<img width="1437" height="803" alt="Screenshot 2026-04-19 at 16 39 06" src="https://github.com/user-attachments/assets/5ff1db3d-1bba-4dae-bc9b-ee61581d6cb9" />
 
 
 
